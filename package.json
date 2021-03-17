@@ -6,7 +6,7 @@
   "author": "Klaytn",
   "license": "MIT",
   "scripts": {
-    "build": "truffle compile",
+    "build": "node --max-old-space-size=4096 /usr/local/bin/truffle compile",
     "test": "concurrently --success first --kill-others \"yarn run:ganache\" \"yarn test:ganache\"",
     "run:ganache": "ganache-cli -l 80000000 -q -k constantinople",
     "run:klaytn": "./test/prepare.sh",
