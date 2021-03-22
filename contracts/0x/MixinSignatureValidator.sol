@@ -334,7 +334,7 @@ contract MixinSignatureValidator is
             bytes32 s = signature.readBytes32(33);
             address recovered = ecrecover(
                 keccak256(abi.encodePacked(
-                    "\x19Ethereum Signed Message:\n32",
+                    "\x19Klaytn Signed Message:\n32",
                     hash
                 )),
                 v,
