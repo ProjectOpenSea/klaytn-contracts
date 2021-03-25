@@ -37,6 +37,7 @@ contract KIP17Marketplace is Ownable {
    */
   function revokeSell(address nftContract, uint256 tokenId) public {
     require(_sells[nftContract][tokenId].seller == msg.sender, "Not the seller");
+    IKIP17(nftContract).transferFrom(address(this), msg.sender, tokenId);
     delete _sells[nftContract][tokenId];
   }
 
