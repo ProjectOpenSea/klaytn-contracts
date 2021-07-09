@@ -17,7 +17,7 @@ contract KIP17Exchange is KIP17Full, KIP17Mintable, KIP17MetadataMintable, Trade
   struct Auction {
     address bidder;
     uint256 bidTimestamp;
-    uint256 settlementPeriod;
+    uint256 closingPeriod;
     address priceContract;
     uint256 price;
   }
@@ -34,7 +34,7 @@ contract KIP17Exchange is KIP17Full, KIP17Mintable, KIP17MetadataMintable, Trade
     address priceContract, uint256 price);
 
   event AuctionPlaced(address indexed seller, uint256 indexed tokenId, address indexed priceContract,
-      uint256 settlementPeriod, uint256 initialPrice);
+      uint256 closingPeriod, uint256 initialPrice);
   event AuctionBid(uint256 indexed tokenId, address indexed bidder, uint256 price);
   event AuctionCancelled(uint256 indexed tokenId);
   event AuctionFinalized(address indexed seller, address indexed buyer, uint256 indexed tokenId,
@@ -90,23 +90,23 @@ contract KIP17Exchange is KIP17Full, KIP17Mintable, KIP17MetadataMintable, Trade
   }
 
   function placeAuction(uint256 tokenId, address priceContract, uint256 initialPrice, 
-      uint256 settlementPeriod) public {
+      uint256 closingPeriod) public {
     require(_checkPermission(tokenId), "KIP17Exchange: not owner or approver");
 
     address seller = msg.sender;
     _orders[tokenId] = Order(seller, OrderType.Auction);
-    _auctions[tokenId] = Auction(address(0), 0, settlementPeriod, priceContract, initialPrice);
+    _auctions[tokenId] = Auction(address(0), 0, closingPeriod, priceContract, initialPrice);
 
-    emit AuctionPlaced(seller, tokenId, priceContract, settlementPeriod, initialPrice);
+    emit AuctionPlaced(seller, tokenId, priceContract, closingPeriod, initialPrice);
   }
 
   function getAuction(uint256 tokenId) public view
       returns (address seller, address bidder, uint256 bidTimestamp, address priceContract, 
-        uint256 currentPrice, uint256 settlementPeriod) {
+        uint256 currentPrice, uint256 closingPeriod) {
     seller = _orders[tokenId].seller;
     Auction storage a = _auctions[tokenId];
 
-    return (seller, a.bidder, a.bidTimestamp, a.priceContract, a.price, a.settlementPeriod);
+    return (seller, a.bidder, a.bidTimestamp, a.priceContract, a.price, a.closingPeriod);
   }
 
   function cancelAuction(uint256 tokenId) public {
@@ -132,7 +132,7 @@ contract KIP17Exchange is KIP17Full, KIP17Mintable, KIP17MetadataMintable, Trade
 
     Auction storage a = _auctions[tokenId];
     require(a.bidder != address(0), "KIP17Exchange: cannot finalize because of no bidder");
-    require(a.bidTimestamp + a.settlementPeriod < now, "KIP17Exchange: settlement period not passed");
+    require(a.bidTimestamp + a.closingPeriod < now, "KIP17Exchange: closing period not passed");
 
     _finalizeTrade(a.bidder, tokenId, a.priceContract, a.price);
 

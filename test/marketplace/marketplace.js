@@ -13,12 +13,13 @@ const secondTokenId = new BN(2)
 const feeRatio1 = new BN(1000)
 const feeRatio2 = new BN(2000)
 const price = new BN(100)
-const settlementPeriod = new BN(10)
+const closingPeriod = 10
 const bidPrice1 = new BN(200)
 const bidPrice2 = new BN(300)
 const bidPrice3 = new BN(400)
 const ftInitialSupply = new BN(10000000)
 const BN0 = new BN(0)
+const basePointDenom = new BN(100000)
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
@@ -56,7 +57,8 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
   describe('mint tradable nft', async function() {
     let logs = null
     beforeEach(async function() {
-      const result = await this.kip17Contract.mintTradable(account1, tokenId, uri, [feeReceiver1, feeReceiver2], [feeRatio1, feeRatio2], {from:minter})
+      const result = await this.kip17Contract.mintTradable(account1, tokenId, uri, 
+        [feeReceiver1, feeReceiver2], [feeRatio1, feeRatio2], {from:minter})
       logs = result.logs;
     })
 
@@ -194,8 +196,8 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
       describe('buy the order', async function() {
         let logs = null
         let rawLogs = null
-        var fee1 = price.mul(feeRatio1).div(new BN(100000))
-        var fee2 = price.mul(feeRatio2).div(new BN(100000))
+        var fee1 = price.mul(feeRatio1).div(basePointDenom)
+        var fee2 = price.mul(feeRatio2).div(basePointDenom)
         var remaining = price.sub(fee1).sub(fee2)
         beforeEach(async function() {
           var data = caver.abi.encodeParameters(['uint256'],[tokenId])
@@ -246,7 +248,7 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
 
         it('place auction with wrong owner', async function() {
           await shouldFail.reverting.withMessage(
-            this.kip17Contract.placeAuction(tokenId, this.ftContract.address, price, settlementPeriod, {from:account1}),
+            this.kip17Contract.placeAuction(tokenId, this.ftContract.address, price, closingPeriod, {from:account1}),
             'KIP17Exchange: not owner or approver'
           )
         })
@@ -255,7 +257,7 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
     describe('place auction', async function() {
       let logs = null
       beforeEach(async function() {
-        const result = await this.kip17Contract.placeAuction(tokenId, this.ftContract.address, price, settlementPeriod, {from:account1})
+        const result = await this.kip17Contract.placeAuction(tokenId, this.ftContract.address, price, closingPeriod, {from:account1})
         logs = result.logs
       })
 
@@ -264,7 +266,7 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
           seller:account1,
           tokenId,
           priceContract: this.ftContract.address,
-          settlementPeriod,
+          closingPeriod: new BN(closingPeriod),
           initialPrice:price
         })
       })
@@ -275,7 +277,7 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
         result.bidTimestamp.should.be.bignumber.equal(BN0)
         result.priceContract.should.equal(this.ftContract.address)
         result.currentPrice.should.be.bignumber.equal(price)
-        result.settlementPeriod.should.be.bignumber.equal(settlementPeriod)
+        result.closingPeriod.should.be.bignumber.equal(new BN(closingPeriod))
       })
 
       describe('wrong bid auction', async function() {
@@ -341,7 +343,7 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
           result.bidTimestamp.should.be.bignumber.equal(BN0)
           result.priceContract.should.equal(ZERO_ADDRESS)
           result.currentPrice.should.be.bignumber.equal(BN0)
-          result.settlementPeriod.should.be.bignumber.equal(BN0)
+          result.closingPeriod.should.be.bignumber.equal(BN0)
         })
       })
 
@@ -414,7 +416,7 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
             result.bidTimestamp.should.be.bignumber.equal(BN0)
             result.priceContract.should.equal(ZERO_ADDRESS)
             result.currentPrice.should.be.bignumber.equal(BN0)
-            result.settlementPeriod.should.be.bignumber.equal(BN0)
+            result.closingPeriod.should.be.bignumber.equal(BN0)
           })
         })
 
@@ -514,22 +516,22 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
                 this.kip17Contract.finalizeAuction(tokenId, {from:account3}),
                 'KIP17Exchange: not the seller or minter')
             })
-            it('settlement period not passed', async function() {
+            it('closing period not passed', async function() {
               await shouldFail.reverting.withMessage(
                 this.kip17Contract.finalizeAuction(tokenId, {from:minter}),
-                'KIP17Exchange: settlement period not passed')
+                'KIP17Exchange: closing period not passed')
             })
           })
 
-          describe('finalize auction', async function() {
+          describe('close auction', async function() {
             let logs = null
             var account1Balance = null
             var account2Balance = null
             var account3Balance = null
             var feeReceiver1Balance = null
             var feeReceiver2Balance = null
-            var fee1 = bidPrice3.mul(feeRatio1).div(new BN(100000))
-            var fee2 = bidPrice3.mul(feeRatio2).div(new BN(100000))
+            var fee1 = bidPrice3.mul(feeRatio1).div(basePointDenom)
+            var fee2 = bidPrice3.mul(feeRatio2).div(basePointDenom)
             var remaining = bidPrice3.sub(fee1).sub(fee2)
             beforeEach(async function() {
               account1Balance = await this.ftContract.balanceOf(account1)
@@ -537,7 +539,7 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
               account3Balance = await this.ftContract.balanceOf(account3)
               feeReceiver1Balance = await this.ftContract.balanceOf(feeReceiver1)
               feeReceiver2Balance = await this.ftContract.balanceOf(feeReceiver2)
-              await sleep(11000)
+              await sleep((closingPeriod+1)*1000)
               const result = await this.kip17Contract.finalizeAuction(tokenId, {from:account1})
               logs = result.logs
             })
@@ -574,7 +576,7 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
               result.bidTimestamp.should.be.bignumber.equal(BN0)
               result.priceContract.should.equal(ZERO_ADDRESS)
               result.currentPrice.should.be.bignumber.equal(BN0)
-              result.settlementPeriod.should.be.bignumber.equal(BN0)
+              result.closingPeriod.should.be.bignumber.equal(BN0)
             })
           })
         })
