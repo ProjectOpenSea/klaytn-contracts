@@ -1,12 +1,13 @@
 pragma solidity ^0.5.0;
 
 import "../KIP7/IKIP7.sol";
-import "./KIP17Full.sol";
+import "./KIP17Transferrable.sol";
+import "./KIP17Enumerable.sol";
 import "./KIP17MetadataMintable.sol";
 import "./KIP17Mintable.sol";
 import "../../exchange/TradeFeeRegistry.sol";
 
-contract KIP17Exchange is KIP17Full, KIP17Mintable, KIP17MetadataMintable, TradeFeeRegistry {
+contract KIP17Exchange is KIP17Transferrable, KIP17Enumerable, KIP17Mintable, KIP17MetadataMintable, TradeFeeRegistry {
   enum OrderType { None, SellOrder, Auction }
 
   struct SellOrder {
@@ -47,15 +48,17 @@ contract KIP17Exchange is KIP17Full, KIP17Mintable, KIP17MetadataMintable, Trade
 
   bytes4 private constant _KIP7_RECEIVED = 0x9d188c22;
 
-	constructor () public {
+  constructor (string memory name, string memory symbol) public KIP17Metadata(name, symbol) {
+      // solhint-disable-previous-line no-empty-blocks
   }
 
   function mintTradable(address to, uint256 tokenId, string memory tokenURI,
-      address[] memory feeReceivers, uint256[] memory feeRatiosInBp) 
+      bool transferrable, address[] memory feeReceivers, uint256[] memory feeRatiosInBp) 
       public onlyMinter returns (bool) {
 
     mintWithTokenURI(to, tokenId, tokenURI);
     _registerTradeFeeBatch(tokenId, feeReceivers, feeRatiosInBp);
+    _setTransferrable(tokenId, transferrable);
 
     return true;
   }

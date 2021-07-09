@@ -17,6 +17,7 @@ const closingPeriod = 10
 const bidPrice1 = new BN(200)
 const bidPrice2 = new BN(300)
 const bidPrice3 = new BN(400)
+const transferrable = false
 const ftInitialSupply = new BN(10000000)
 const BN0 = new BN(0)
 const basePointDenom = new BN(100000)
@@ -49,7 +50,7 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
 
   it('unauthorized mint', async function() {
     await shouldFail.reverting.withMessage(
-      this.kip17Contract.mintTradable(account1, tokenId, uri, [feeReceiver1, feeReceiver2], [feeRatio1, feeRatio2], {from:account1}),
+      this.kip17Contract.mintTradable(account1, tokenId, uri, transferrable, [feeReceiver1, feeReceiver2], [feeRatio1, feeRatio2], {from:account1}),
       'MinterRole: caller does not have the Minter role'
     )
   })
@@ -58,7 +59,7 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
     let logs = null
     beforeEach(async function() {
       const result = await this.kip17Contract.mintTradable(account1, tokenId, uri, 
-        [feeReceiver1, feeReceiver2], [feeRatio1, feeRatio2], {from:minter})
+        transferrable, [feeReceiver1, feeReceiver2], [feeRatio1, feeRatio2], {from:minter})
       logs = result.logs;
     })
 
@@ -87,6 +88,31 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
       await shouldFail.reverting.withMessage(
         this.kip17Contract.placeSellOrder(tokenId, this.ftContract.address, price, {from:feeReceiver1}),
         'KIP17Exchange: not owner or approver')
+    })
+
+    it('check transferFrom', async function() {
+      if(transferrable === false) {
+        await shouldFail.reverting.withMessage(
+          this.kip17Contract.transferFrom(account1, account2, tokenId, {from:account1}),
+          'KIP17Transferrable: transfer not allowed'
+        )
+      }
+    })
+    it('check safeTransferFrom', async function() {
+      if(transferrable === false) {
+        await shouldFail.reverting.withMessage(
+          this.kip17Contract.safeTransferFrom(account1, account2, tokenId, {from:account1}),
+          'KIP17Transferrable: transfer not allowed'
+        )
+      }
+    })
+    it('check safeTransferFrom with data', async function() {
+      if(transferrable === false) {
+        await shouldFail.reverting.withMessage(
+          this.kip17Contract.methods["safeTransferFrom(address,address,uint256,bytes)"](account1, account2, tokenId, '0x', {from:account1}),
+          'KIP17Transferrable: transfer not allowed'
+        )
+      }
     })
 
     describe('place sell order', async function() {
