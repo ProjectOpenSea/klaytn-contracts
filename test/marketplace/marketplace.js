@@ -144,6 +144,12 @@ contract('KIP17Exchange', function ([minter, account1, account2, account3, feeRe
           'KIP17Exchange: order already placed')
       })
 
+      it('place auction order', async function() {
+        await shouldFail.reverting.withMessage(
+          this.kip17Contract.placeAuction(tokenId, this.ftContract.address, price, closingPeriod, {from:account1}),
+          'KIP17Exchange: order already placed')
+      })
+
       describe('wrong buy order', async function() {
         it('wrong tokenId', async function() {
           var data = caver.abi.encodeParameters(['uint256'], [secondTokenId])

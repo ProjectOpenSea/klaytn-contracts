@@ -52,7 +52,11 @@ contract TradeFeeRegistry {
     uint256 remaining = price;
     for(uint256 i = 0; i < _tradeFeeReceivers[id].length; i++) {
       uint256 amount = price.mul(_tradeFeeRatiosInBp[id][i]).div(100000);
-      IKIP7(priceContract).safeTransfer(_tradeFeeReceivers[id][i], amount);
+      if(priceContract == address(0)) {
+        _tradeFeeReceivers[id][i].transfer(amount);
+      } else {
+        IKIP7(priceContract).safeTransfer(_tradeFeeReceivers[id][i], amount);
+      }
       remaining -= amount;
     }
     return remaining;
