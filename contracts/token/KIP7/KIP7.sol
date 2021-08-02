@@ -253,11 +253,26 @@ contract KIP7 is KIP13, IKIP7 {
     function _checkOnKIP7Received(address sender, address recipient, uint256 amount, bytes memory _data)
         internal returns (bool)
     {
+        bool success; 
+        bytes memory returndata;
+
         if (!recipient.isContract()) {
             return true;
         }
 
-        bytes4 retval = IKIP7Receiver(recipient).onKIP7Received(msg.sender, sender, amount, _data);
-        return (retval == _KIP7_RECEIVED);
+        (success, returndata) = recipient.call(
+            abi.encodeWithSelector(_KIP7_RECEIVED, msg.sender, sender, amount, _data)
+        );
+        if (returndata.length != 0 && abi.decode(returndata, (bytes4)) == _KIP7_RECEIVED) {
+            return true;
+        }
+        assembly {
+            let ptr := mload(0x40)
+            let size := returndatasize
+            returndatacopy(ptr, 0, size)
+            revert(ptr, size)
+        }
+
+        return false;
     }
 }

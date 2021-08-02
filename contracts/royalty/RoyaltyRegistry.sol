@@ -10,29 +10,29 @@ contract RoyaltyRegistry is IRoyaltyRegistry {
 
   uint256 constant BASIS_POINT_DENOM = 100000;
 
-  mapping(address=>mapping(uint256=>address payable[])) _receivers;
+  mapping(address=>mapping(uint256=>address payable[])) _royaltyReceivers;
   mapping(address=>mapping(uint256=>uint256[])) _ratioInBp;
 
-  function setRoyalty(address nftContract, uint256 tokenId, address payable[] memory receivers, uint256[] memory ratiosInBp) public {
-    require(receivers.length == ratiosInBp.length, "RoyaltyRegistry: length not matched: receivers, reatiosInBp");
+  function setRoyalty(address nftContract, uint256 tokenId, address payable[] memory royaltyReceivers, uint256[] memory ratiosInBp) public {
+    require(royaltyReceivers.length == ratiosInBp.length, "RoyaltyRegistry: length not matched: royaltyReceivers, reatiosInBp");
     require(CreatorRole(nftContract).creatorOf(tokenId) == msg.sender, "RoyaltyRegistry: not creator");
     require(IKIP17(nftContract).ownerOf(tokenId) == msg.sender, "RoyaltyRegistry: not owner");
-    _receivers[nftContract][tokenId] = receivers;
+    _royaltyReceivers[nftContract][tokenId] = royaltyReceivers;
     _ratioInBp[nftContract][tokenId] = ratiosInBp;
 
-    emit RoyaltySet(nftContract, tokenId, receivers, ratiosInBp);
+    emit RoyaltySet(nftContract, tokenId, royaltyReceivers, ratiosInBp);
   }
 
   function getRoyalty(address nftContract, uint256 tokenId, uint256 value) public view 
-      returns(address payable[] memory recipients, uint256[] memory amounts) {
+      returns(address payable[] memory royaltyReceivers, uint256[] memory royalties) {
 
-    recipients = _receivers[nftContract][tokenId];
-    amounts = new uint256[](recipients.length);
-    for(uint256 i = 0; i < recipients.length; i++) {
-      amounts[i] = value * _ratioInBp[nftContract][tokenId][i] / BASIS_POINT_DENOM;
+    royaltyReceivers = _royaltyReceivers[nftContract][tokenId];
+    royalties = new uint256[](royaltyReceivers.length);
+    for(uint256 i = 0; i < royaltyReceivers.length; i++) {
+      royalties[i] = value * _ratioInBp[nftContract][tokenId][i] / BASIS_POINT_DENOM;
     }
 
-    return (recipients, amounts);
+    return (royaltyReceivers, royalties);
   }
 
 }

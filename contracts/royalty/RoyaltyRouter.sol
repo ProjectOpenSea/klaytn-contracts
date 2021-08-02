@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 
 import "../access/roles/MinterRole.sol";
 import "./IRoyaltyRouter.sol";
-import "./IRoyaltyRegistry.sol";
+import "./IRoyaltyInfo.sol";
 
 contract RoyaltyRouter is IRoyaltyRouter {
 
@@ -21,14 +21,14 @@ contract RoyaltyRouter is IRoyaltyRouter {
   }
 
   function getRoyalty(address nftContract, uint256 tokenId, uint256 value) public view 
-      returns(address payable[] memory recipients, uint256[] memory amounts) {
+      returns(address payable[] memory royaltyReceivers, uint256[] memory royalties) {
     address royaltyContract = nftContract;
 
     if(_royaltyInfoOverride[nftContract] != address(0)) {
       royaltyContract = _royaltyInfoOverride[nftContract];
     }
     
-    return IRoyaltyRegistry(royaltyContract).getRoyalty(nftContract, tokenId, value);
+    return IRoyaltyInfo(royaltyContract).getRoyalty(tokenId, value);
   }
 
 }

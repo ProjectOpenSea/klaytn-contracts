@@ -1,8 +1,17 @@
+# Testing NFT marketplace with Royalty
+
+```bash
+$ npm run run:ganache
+$ npm run test:ganache ./test/exchange/KIP17/KIP17FixedPriceExchange.test.js
+```
+---
+
 # klaytn-contracts
 
 This repository contains contracts that are helpful to building blockchain applications on Klaytn.
 
 Some files were derived from [openzeppelin contracts v2.3.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v2.3.0).
+
 
 # Security
 

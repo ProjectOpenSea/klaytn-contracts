@@ -12,7 +12,7 @@
   "scripts": {
     "build": "truffle compile",
     "test": "concurrently --success first --kill-others \"yarn run:ganache\" \"yarn test:ganache\"",
-    "run:ganache": "ganache-cli -l 80000000 -q -k constantinople",
+    "run:ganache": "ganache-cli -e 100000 -l 800000000 -q -k constantinople",
     "run:klaytn": "./test/prepare.sh",
     "run:klaytn:start": "./test/prepare.sh",
     "run:klaytn:stop": "./test/stop.sh",

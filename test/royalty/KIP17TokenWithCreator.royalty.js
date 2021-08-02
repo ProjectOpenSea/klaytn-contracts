@@ -1,6 +1,6 @@
 
 const { BN, constants, expectEvent } = require('openzeppelin-test-helpers');
-const expectRevert = require('../../helpers/expectRevert')
+const expectRevert = require('../helpers/expectRevert')
 const { ZERO_ADDRESS } = constants;
 var should = require('chai').should();
 

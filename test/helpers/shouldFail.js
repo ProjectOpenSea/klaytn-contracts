@@ -18,7 +18,8 @@ async function shouldFailWithMessage (promise, message) {
       } else if(error.reason) {
         expect(error.reason).to.include(message)
       } else {
-        expect.fail('unprocessed error', error)
+        console.log(error);
+        expect.fail('unprocessed error')
       }
     }
     return;
