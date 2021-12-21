@@ -13,7 +13,7 @@ var forwarder = artifacts.require('Forwarder')
 var libAssetData = artifacts.require('LibAssetData')
 var libDydxBalance = artifacts.require('LibDydxBalance')
 var libOrderTransferSimulation = artifacts.require('LibOrderTransferSimulation')
-var libTransactionDecoder = artifacts.require('libTransactionDecoder')
+var libTransactionDecoder = artifacts.require('LibTransactionDecoder')
 var libFillResults = artifacts.require('LibFillResults')
 var libSafeMath = artifacts.require('LibSafeMath')
 var libMath = artifacts.require('LibMath')
@@ -87,12 +87,12 @@ module.exports = async function(deployer) {
 
   await deployer.deploy(forwarder, exchange.address, "0x0000000000000000000000000000000000000000", wklay.address)
 
-  console.log({exchange:exchange.address, 
-    erc20Proxy:erc20Proxy.address, 
-    erc721Proxy:erc721Proxy.address, 
-    erc1155Proxy:erc1155Proxy.address, 
+  console.log({exchange:exchange.address,
+    erc20Proxy:erc20Proxy.address,
+    erc721Proxy:erc721Proxy.address,
+    erc1155Proxy:erc1155Proxy.address,
     staticCallProxy:staticCallProxy.address,
-    multiAssetProxy:multiAssetProxy.address, 
+    multiAssetProxy:multiAssetProxy.address,
     coordinatorRegistry:coordinatorRegistry.address,
     coordinator:coordinator.address,
     devUtils:devUtils.address,

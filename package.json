@@ -18,20 +18,23 @@
     "run:klaytn:cleanlog": "find -s ./test -name tee.*.log -delete",
     "test:ganache": "truffle test",
     "test:klaytn": "truffle test --network klaytn",
-    "deploy:klaytn": "truffle deploy --network klaytn",
+    "deploy:local": "truffle deploy --network local",
     "deploy:baobab": "truffle deploy --network baobab",
-    "deploy:cypress": "truffle deploy --network cypress"
+    "deploy:cypress": "truffle deploy --network cypress",
+    "deploy:kasCypress": "truffle deploy --network kasCypress",
+    "deploy:kasBaobab": "truffle deploy --network kasBaobab"
   },
   "dependencies": {
     "caver-js": "^1.5.0",
     "caver-js-ext-kas": "^1.0.1",
+    "dotenv": "^10.0.0",
     "truffle-hdwallet-provider-klaytn": "^1.0.13-a"
   },
   "devDependencies": {
     "concurrently": "^5.3.0",
     "ganache-cli": "^6.12.1",
-    "truffle": "^5.1.23",
     "openzeppelin-test-helpers": "^0.3.2",
+    "truffle": "^5.1.61",
     "truffle-assertions": "^0.9.2"
   }
 }

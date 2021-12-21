@@ -13,11 +13,10 @@ If you find any security problems in the source code, please report it to develo
 
 The following packages should be installed before using this source code.
 
+* jq
 * git
 * docker
-* Node v10.21.0
-* Truffle v5.1.61
-* ganache-cli v6.12.1
+* Node v16.11.0
 
 # Package Installation
 
@@ -25,8 +24,6 @@ Please install node packages first.
 
 ```bash
 $ npm install
-$ npm install -g truffle@v5.1.61
-$ npm install -g ganache-cli@v6.12.1
 ```
 
 # How to run Ganache
@@ -66,97 +63,64 @@ $ npm run test:ganache
 $ npm run test:ganache -- ./test/token/KIP7/KIP7.test.js
 
 # To run a test on a local klaytn network, execute the below.
-$ npm run test:klaytn
-$ npm run test:klaytn -- ./test/token/KIP7/KIP7.test.js
+$ npm run test:local
+$ npm run test:local -- ./test/token/KIP7/KIP7.test.js
 ```
 
 # How to Deploy Contracts
-
+Deployment script is in [2_contract_migration.js](./contracts/migrations/2_contract_migration.js) which needs to be 
+updated in case of adding any additional contracts that supposed to be deployed.
 
 ## Deploying a contract to the local network
 
-1. To deploy a contract, please modify [2_contract_migration.js](./contracts/migrations/2_contract_migration.js). The file deploys a KIP7 contract currently.
-2. Execute the following command to deploy the local network.
+Add `LOCAL_DEPLOYMENT_ACCOUNT_PRIVATE_KEY` into `.env` file (see `.env.sample` for example) and run:
 
 ```bash
-$ npm run deploy:klaytn
+$ npm run deploy:local
 ```
 
 ## Deploying a contract to Baobab
 
+Add `BAOBAB_DEPLOYMENT_ACCOUNT_PRIVATE_KEY` into `.env` file (see `.env.sample` for example).
+
 ### Using an EN
 
-Update `privateKey` and `EN URL` in `baobab` of [truffle-config.js](./truffle-config.js).
-
-```js
-    baobab: {
-      provider: () => {
-        return new HDWalletProvider(privateKey, "https://your.baobab.en:8651");
-      },
-      network_id: '1001', //Klaytn baobab testnet's network id
-      gas: '8500000',
-      gasPrice: null
-    },
+Add `BAOBAB_NODE_URL` into `.env` file (see `.env.sample` for example) and run:
+```bash
+$ npm run deploy:baobab
 ```
+
 
 ### Using KAS
 
-Also, you can use [KAS](http://www.klaytnapi.com) instead of your own EN. Please refer to `kasBaobab` as shown below.
-In this case, you need to update `privateKey`, `accessKeyId`, and `secretAccessKey`.
+Also, you can use [KAS](http://www.klaytnapi.com) instead of your own EN. You need to create the `.env` file (see 
+`.env.sample` for example) and fill in the following environmental variables: `BAOBAB_DEPLOYMENT_ACCOUNT_PRIVATE_KEY`, 
+`KAS_ACCESS_KEY` and `KAS_SECRET_ACCESS_KEY`.
 
-**NOTE**: As of Feb 2021, "Using KAS" is not supported yet.
-
-```js
-const accessKeyId = "ACCESS_KEY";
-const secretAccessKey = "SECRET_KEY";
-
-...
-
-    kasBaobab: {
-      provider: () => {
-        option.headers['x-chain-id'] = '1001';
-        return new HDWalletProvider(privateKey, new Caver.providers.HttpProvider("https://node-api.klaytnapi.com/v1/klaytn", option))
-      },
-      network_id: '1001', //Klaytn baobab testnet's network id
-      gas: '8500000',
-      gasPrice:'25000000000'
-    },
+```bash
+$ npm run deploy:kasBaobab
 ```
 
 ## Deploying a contract to Cypress
 
-### Using an EN
-Update `privateKey` and `EN URL` in `baobab` of [truffle-config.js](./truffle-config.js).
+Add `CYPRESS_DEPLOYMENT_ACCOUNT_PRIVATE_KEY` into `.env` file (see `.env.sample` for example).
 
-```js
-    cypress: {
-      provider: () => new HDWalletProvider(privateKey, "https://your.cypress.en:8651"),
-      network_id: '8217', //Klaytn mainnet's network id
-      gas: '8500000',
-      gasPrice: null
-    }
+### Using an EN
+Add `CYPRESS_NODE_URL` into `.env` file (see `.env.sample` for example) and run:
+```bash
+$ npm run deploy:cypress
 ```
 
 ### Using KAS
 
-Also, you can use [KAS](http://www.klaytnapi.com) instead of your own EN. Please refer to `kasBaobab` as shown below.
-In this case, you need to update `privateKey`, `accessKeyId`, and `secretAccessKey`.
+Also, you can use [KAS](http://www.klaytnapi.com) instead of your own EN. Add `KAS_ACCESS_KEY` and 
+`KAS_SECRET_ACCESS_KEY` into `.env` file (see `.env.sample` for example) and run:
 
-**NOTE**: As of Feb 2021, "Using KAS" is not supported yet.
-
-```js
-const accessKeyId = "ACCESS_KEY";
-const secretAccessKey = "SECRET_KEY";
-
-...
-
-    kasCypress: {
-      provider: () => {
-        option.headers['x-chain-id'] = '8217';
-        return new HDWalletProvider(privateKey, new Caver.providers.HttpProvider("https://node-api.klaytnapi.com/v1/klaytn", option))
-      },
-      network_id: '8217', //Klaytn baobab testnet's network id
-      gas: '8500000',
-      gasPrice:'25000000000'
-    },
+```bash
+$ npm run deploy:kasCypress
 ```
+
+# How to verify contracts
+Submit a request on KlaytnScope support page:
+* for Baobab: https://baobab.scope.klaytn.com/contract/submission
+* for Cypress: https://scope.klaytn.com/contract/submission
